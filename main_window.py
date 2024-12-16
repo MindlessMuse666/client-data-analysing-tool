@@ -3,10 +3,10 @@ import pandas as pd
 import PyQt6.QtCore
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton,
                              QTableView, QFileDialog, QHBoxLayout, QLabel)
+from PyQt6.QtCore import QAbstractTableModel
 from PyQt6.uic.properties import QtCore
-from PyQt6.QtCore import Qt, QAbstractTableModel, QAbstractItemModel
-from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QHeaderView # Импортируем QHeaderView
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QHeaderView
 
 
 class MainWindow(QWidget):
@@ -36,12 +36,12 @@ class MainWindow(QWidget):
 
 
     def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)") # Убрали options()
+        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)")
 
         if file_name:
             try:
                 self.file_label.setText(file_name)
-                df = pd.read_csv(file_name)
+                df = pd.read_csv(file_name, sep=';')
                 self.display_data(df)
             except pd.errors.EmptyDataError:
                 self.display_data(pd.DataFrame())
@@ -59,9 +59,9 @@ class MainWindow(QWidget):
         self.table_view.setModel(model)
 
 
-class PandasModel(PyQt6.QtCore.QAbstractTableModel):
+class PandasModel(QAbstractTableModel):
     def __init__(self, data):
-        QtCore.QAbstractTableModel.__init__(self)
+        QAbstractTableModel.__init__(self)
         self._data = data
 
     def rowCount(self, parent=None):
@@ -83,8 +83,6 @@ class PandasModel(PyQt6.QtCore.QAbstractTableModel):
 
 
 if __name__ == "__main__":
-    import sys
-    from PyQt6 import QtCore
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
