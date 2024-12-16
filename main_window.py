@@ -1,19 +1,24 @@
 import sys
+
+import PyQt6.QtGui
+import matplotlib.cm
+import numpy as np
 import pandas as pd
-import PyQt6.QtCore
+import matplotlib.pyplot as plt
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton,
-                             QTableView, QFileDialog, QHBoxLayout, QLabel)
-from PyQt6.QtCore import QAbstractTableModel
-from PyQt6.uic.properties import QtCore
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHeaderView
+                             QTableView, QFileDialog, QHBoxLayout, QLabel, QHeaderView,
+                             QMessageBox)
+from PyQt6.QtCore import Qt, QAbstractTableModel, QAbstractItemModel, pyqtSlot
+from PyQt6.QtGui import QIcon
+from PyQt6.uic.Compiler.qtproxies import QtGui
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("CSV Data Analyzer")
+        self.setWindowTitle("CheCloud")
+        self.setWindowIcon(QIcon('static/images/sato.ico'))
 
         # Layout
         main_layout = QVBoxLayout()
@@ -53,10 +58,44 @@ class MainWindow(QWidget):
                 print(f"Ошибка: {e}")
                 self.display_data(pd.DataFrame())
 
+        self.df = df
+
 
     def display_data(self, df):
         model = PandasModel(df)
         self.table_view.setModel(model)
+
+        # Добавляем кнопку для построения графика
+        plot_button = QPushButton("Построить гистограмму")
+        plot_button.clicked.connect(self.plot_histogram)
+        self.layout().addWidget(plot_button)
+
+    def plot_histogram(self):
+        if not hasattr(self, 'df'):
+            QMessageBox.warning(self, "Ошибка", "Сначала загрузите данные")
+            return
+
+        if self.df.empty:
+            QMessageBox.warning(self, "Ошибка", "Таблица данных пуста")
+            return
+
+        try:
+            # Выбор столбца для построения гистограммы (можно сделать более сложный выбор)
+            column_to_plot = self.df.columns[0]
+
+            fig, ax = plt.subplots()
+            ax.hist(self.df[column_to_plot].dropna(), bins=10)  #dropna() - удаляем NaN
+            ax.set_xlabel(column_to_plot)
+            ax.set_ylabel("Частота")
+            ax.set_title(f"Гистограмма для столбца '{column_to_plot}'")
+            #turbo_cm = matplotlib.cm.get_cmap('turbo')
+            #colors = [turbo_cm(v) for v in np.linspace(0, 1, len(self.df))] #Смена цвета столбцов
+            #self.df.Count.plot(kind="bar", legend=False, color=colors)
+            #Показываем график в отдельном окне
+            plt.show()
+
+        except Exception as e:
+            QMessageBox.warning(self, "Ошибка", f"Ошибка при построении графика: {e}")
 
 
 class PandasModel(QAbstractTableModel):
@@ -85,5 +124,6 @@ class PandasModel(QAbstractTableModel):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
+    #window.setWindowIcon(QIcon('sato.ico'))
     window.show()
     sys.exit(app.exec())
