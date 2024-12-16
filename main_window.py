@@ -36,9 +36,7 @@ class MainWindow(QWidget):
 
 
     def open_file(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)") # Убрали options()
 
         if file_name:
             try:
@@ -46,10 +44,10 @@ class MainWindow(QWidget):
                 df = pd.read_csv(file_name)
                 self.display_data(df)
             except pd.errors.EmptyDataError:
-                self.display_data(pd.DataFrame()) #Обработка пустого файла
+                self.display_data(pd.DataFrame())
                 print("Файл пустой")
             except pd.errors.ParserError:
-                self.display_data(pd.DataFrame()) #Обработка ошибки парсинга
+                self.display_data(pd.DataFrame())
                 print("Ошибка парсинга файла")
             except Exception as e:
                 print(f"Ошибка: {e}")
