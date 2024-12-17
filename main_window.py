@@ -4,9 +4,14 @@ import matplotlib.pyplot as plt
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton,
                              QTableView, QFileDialog, QHBoxLayout, QLabel, QHeaderView,
                              QMessageBox, QComboBox)
-from PyQt6.QtCore import Qt, QAbstractTableModel, QAbstractItemModel, pyqtSlot
+from PyQt6.QtCore import Qt, QAbstractTableModel, pyqtSlot
 from PyQt6.QtGui import QIcon
 import sqlite3
+import os
+
+from matplotlib.cbook import open_file_cm
+
+
 # import matplotlib.backends.backend_qt6agg as mplt_backend
 
 
@@ -68,8 +73,21 @@ class MainWindow(QWidget):
         main_layout.addWidget(save_button)
         self.db_name = "client_data.db"
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)")
+        self.file_loaded = False
+
+        self.last_file_path = self.load_last_file_path()
+        if self.last_file_path and os.path.exists(self.last_file_path):
+            self.open_file(self.last_file_path)
+            self.file_loaded = True
+
+    @pyqtSlot()
+
+    def open_file(self, file_name=None):
+        if self.file_loaded:  # проверка, загружен ли уже файл
+            file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)")
+
+        if file_name is None:  # Проверка выполняется ПЕРЕД вызовом QFileDialog
+            file_name, _ = QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)")
 
         if file_name:
             try:
@@ -77,6 +95,8 @@ class MainWindow(QWidget):
                 df = pd.read_csv(file_name, sep=';')
                 self.display_data(df)
                 self.save_to_db()
+                self.save_last_file_path(file_name)
+                self.file_loaded = True
             except pd.errors.EmptyDataError:
                 self.display_data(pd.DataFrame())
                 print("Файл пустой")
@@ -86,6 +106,23 @@ class MainWindow(QWidget):
             except Exception as e:
                 print(f"Ошибка: {e}")
                 self.display_data(pd.DataFrame())
+
+    def save_last_file_path(self, file_path):
+        try:
+            with open("last_file.txt", "w") as f:
+                f.write(file_path)
+        except Exception as e:
+            print(f"Ошибка сохранения пути к последнему файлу: {e}")
+
+    def load_last_file_path(self):
+        try:
+            with open("last_file.txt", "r") as f:
+                return f.readline().strip()
+        except FileNotFoundError:
+            return None
+        except Exception as e:
+            print(f"Ошибка загрузки пути к последнему файлу: {e}")
+            return None
 
     def display_data(self, df):
         self.df = df
