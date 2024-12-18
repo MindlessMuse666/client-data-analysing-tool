@@ -25,6 +25,12 @@
 
 ## Скриншоты приложения:
 
+Фронтэнд-интерфейс (пока не встроен в бекэнд):
+
+![client-data-analising-tool](https://github.com/user-attachments/assets/1670b795-0cc3-4086-b6b1-05291ad1060c)
+
+Бекэнд-интерфейс:
+
 ![image](https://github.com/user-attachments/assets/da5b0dcd-2d52-4cb5-906a-7ed101bfcb0d)
 ![image](https://github.com/user-attachments/assets/7114b210-6474-4d8a-bb5c-34c7137e6d79)
 
