@@ -14,8 +14,11 @@ from plotting.plot_handler import PlotHandler
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+
+        """ Установка названия и иконки приложения 
+        Инициализация объектов DataHandler (БД) и PlotHandler (Черчение графиков) """
         self.setWindowTitle("CheCloud")
-        self.setWindowIcon(QIcon('static/images/icon.ico'))
+        self.setWindowIcon(QIcon('static/images/main_icon.ico'))
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
 
@@ -30,6 +33,7 @@ class MainWindow(QWidget):
         button_layout.addWidget(open_button)
         main_layout.addLayout(button_layout)
 
+        """ UI: создание элемента таблицы, где отображаются данные csv-файла """
         self.table_view = QTableView()
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         main_layout.addWidget(self.table_view)

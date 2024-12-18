@@ -3,7 +3,8 @@ import pandas as pd
 from PyQt6.QtWidgets import QMessageBox
 
 class PlotHandler:
-    def plot(self, df, chart_type, x_column, y_column, column_to_plot):
+    @staticmethod
+    def plot(df, chart_type, x_column, y_column, column_to_plot):
         fig, ax = plt.subplots()
 
         try:

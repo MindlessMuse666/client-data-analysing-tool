@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>file_path_24dp.svg</file>
+    <file>main_icon.ico</file>
+    <file>file_draft_24dp.svg</file>
+    <file>delete_24dp.svg</file>
+    <file>graph_24dp.svg</file>
+    <file>save_24dp.svg</file>
+  </qresource>
+</RCC>
