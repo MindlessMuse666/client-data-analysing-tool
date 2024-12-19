@@ -1,1 +1,1 @@
-C:/Users/vlad/Desktop/client-test-data-2.csv
+C:/Users/Kakao/OneDrive/Документы/GitHub/client-data-analysing-tool/big_data/test_data_csv/fitness_test_data.csv
