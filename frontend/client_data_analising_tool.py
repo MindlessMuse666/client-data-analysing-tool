@@ -88,6 +88,7 @@ class Ui_MainWindow(object):
 "    border: 2px solid #567c8d;\n"
 "    border-radius: 8px;\n"
 "    background-color: #f5efeb;\n"
+"    color: #2f4156;\n"
 "    selection-background-color: #c8d9e6;\n"
 "}")
         self.comboBox_4.setObjectName("comboBox_4")
@@ -117,6 +118,7 @@ class Ui_MainWindow(object):
 "  subcontrol-origin: padding;\n"
 "  subcontrol-position: top right;\n"
 "  width: 20px;\n"
+"  color: #2f4156;\n"
 "  border-left: 2px solid #567c8d; /* Сохраняем общий стиль границы */\n"
 "  border-top-right-radius: 8px;\n"
 "  border-bottom-right-radius: 8px;\n"
@@ -133,6 +135,7 @@ class Ui_MainWindow(object):
 "    border: 2px solid #567c8d;\n"
 "    border-radius: 8px;\n"
 "    background-color: #f5efeb;\n"
+"    color: #2f4156;\n"
 "    selection-background-color: #c8d9e6;\n"
 "}")
         self.comboBox_2.setObjectName("comboBox_2")
@@ -222,7 +225,8 @@ class Ui_MainWindow(object):
 "    background-color: #f5efeb;\n"
 "    gridline-color: #d0d0d0;\n"
 "    border: 2px solid #567c8d;\n"
-"      border-radius: 8px;\n"
+"    border-radius: 8px;\n"
+"    color: #2f4156;\n"
 "}\n"
 "QHeaderView::section { /* Заголовки столбцов */\n"
 "  background-color: #e0d6cd; /* Светло-бежевый фон заголовков */\n"
@@ -232,6 +236,7 @@ class Ui_MainWindow(object):
 "}\n"
 "QTableView QAbstractItemView::item {\n"
 "    border: 0.5px solid #e0d6cd; /* Тонкая граница для ячеек */\n"
+"    color: #2f4156;\n"
 "}\n"
 "\n"
 "QTableView::item:selected{\n"
@@ -285,6 +290,7 @@ class Ui_MainWindow(object):
 "    border: 2px solid #567c8d;\n"
 "    border-radius: 8px;\n"
 "    background-color: #f5efeb;\n"
+"    color: #2f4156;"
 "    selection-background-color: #c8d9e6;\n"
 "}")
         self.comboBox.setIconSize(QtCore.QSize(24, 24))
@@ -336,6 +342,7 @@ class Ui_MainWindow(object):
 "    border: 2px solid #567c8d;\n"
 "    border-radius: 8px;\n"
 "    background-color: #f5efeb;\n"
+"    color: #2f4156;"
 "    selection-background-color: #c8d9e6;\n"
 "}")
         self.comboBox_3.setObjectName("comboBox_3")
@@ -379,3 +386,4 @@ class Ui_MainWindow(object):
         self.comboBox.setItemText(3, _translate("MainWindow", "Столбчатая диаграмма"))
         self.comboBox.setItemText(4, _translate("MainWindow", "Круговая диаграмма"))
         self.file_path_label.setText(_translate("MainWindow", "Путь к файлу: "))
+

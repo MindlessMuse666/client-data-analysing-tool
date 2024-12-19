@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
+import matplotlib.backends.backend_qt5agg #Для использования в PyQt5
 import pandas as pd
 from PyQt6.QtWidgets import QMessageBox
+import sys
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 class PlotHandler:
     @staticmethod
@@ -57,6 +61,14 @@ class PlotHandler:
 
             ax.set_title(f"{chart_type}")
             plt.show()
+            # PyQt5 integration:
+            #canvas = FigureCanvas(fig)
+            #window = QWidget()
+            #layout = QVBoxLayout()
+            #layout.addWidget(canvas)
+            #window.setLayout(layout)
+            #window.showFullScreen()  # Полноэкранный режим
+            #sys.exit(app.exec()) #Если нужно закрыть приложение, убрать комментарий.
 
         except KeyError:
             QMessageBox.warning(None, "Ошибка", f"Столбец не найден в данных.")
