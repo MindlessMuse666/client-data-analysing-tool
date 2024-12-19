@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>arrow_down_24dp.svg</file>
     <file>file_path_24dp.svg</file>
     <file>main_icon.ico</file>
     <file>file_draft_24dp.svg</file>

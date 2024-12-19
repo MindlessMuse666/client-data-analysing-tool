@@ -64,7 +64,6 @@ class MainWindow(QWidget):
         save_button.clicked.connect(self.save_to_db)
         main_layout.addWidget(save_button)
 
-
         self.last_file_path = self.data_handler.load_last_file_path()
         if self.last_file_path and os.path.exists(self.last_file_path):
             self.open_file(self.last_file_path)
@@ -86,7 +85,6 @@ class MainWindow(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Критическая ошибка", f"Ошибка при загрузке файла: {e}")
-
 
     def display_data(self, df):
         model = PandasModel(df)
