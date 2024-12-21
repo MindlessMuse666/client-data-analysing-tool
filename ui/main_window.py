@@ -13,27 +13,19 @@ from model.pandas_model import PandasModel
 from plotting.plot_handler import PlotHandler
 
 
-class PlotWidget(QWidget):
-    def __init__(self, fig):
-        super().__init__()
-        self.canvas = FigureCanvas(fig)
-        layout = QVBoxLayout()
-        layout.addWidget(self.canvas)
-        self.setLayout(layout)
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        self.setupUi(self)
 
+        self.setupUi(self)
         self.setWindowTitle("CheCloud")
         self.setWindowIcon(QIcon("static/images/main_icon.ico"))
+
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
         self.plot_widget = None
 
-        self.choice_button.clicked.connect(self.open_file)
+        self.choice_button.clicked.connect(self._on_choice_button_clicked)
         self.save_button.clicked.connect(self.save_to_db)
         self.build_graph_button.clicked.connect(self.plot_chart)
         self.comboBox.currentIndexChanged.connect(self.update_plot_button)
@@ -41,23 +33,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBox_3.currentIndexChanged.connect(self.update_plot_button)
         self.comboBox_4.currentIndexChanged.connect(self.update_plot_button)
 
-        self.last_file_path = self.data_handler.load_last_file_path()
-        if self.last_file_path : #and os.path.exists(self.last_file_path):
-            self.open_file()
-
+        self.show()
         self.update_plot_button()
+        self.open_file()
 
     @pyqtSlot()
     def open_file(self):
-        file_name = self.last_file_path
-        if not file_name or not os.path.exists(file_name):
-            file_name, _ = self._open_file_dialog()
-
-        if file_name:
-            self._load_and_display_data(file_name)
+        self.last_file_path = self.data_handler.load_last_file_path()
+        if self.last_file_path and os.path.exists(self.last_file_path):
+            self._load_and_display_data(self.last_file_path)
+        else:
+            self._on_choice_button_clicked()
 
     def _open_file_dialog(self):
         return QFileDialog.getOpenFileName(self, "Выберите CSV файл", "", "CSV Files (*.csv)")
+
+    def _on_choice_button_clicked(self):
+        file_name, _ = self._open_file_dialog()
+        if file_name:
+            self._load_and_display_data(file_name)
 
     def _load_and_display_data(self, file_name):
         try:
@@ -159,3 +153,12 @@ class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignmentFlag.AlignCenter
+
+
+class PlotWidget(QWidget):
+    def __init__(self, fig):
+        super().__init__()
+        self.canvas = FigureCanvas(fig)
+        layout = QVBoxLayout()
+        layout.addWidget(self.canvas)
+        self.setLayout(layout)
