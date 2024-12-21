@@ -138,6 +138,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.plot_widget.deleteLater()
         self.plot_widget = PlotWidget(fig)
         self.plot_widget.setWindowTitle("График")
+        self.plot_widget.setWindowIcon(QIcon("static/images/main_icon.ico"))
         self.plot_widget.showMaximized()
 
     def save_to_db(self):
