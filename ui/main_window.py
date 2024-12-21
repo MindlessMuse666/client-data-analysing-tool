@@ -132,11 +132,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
         return True
 
-    def _create_and_show_plot(self, chart_type, x_axis, y_axis, column):
-        fig, ax = plt.subplots(figsize=(10, 6))
-        self.plot_handler.plot(self.data_handler.df, chart_type, x_axis, y_axis, column, ax)
-        self._show_plot_widget(fig)
-
     def _show_plot_widget(self, fig):
         if self.plot_widget:
             self.gridLayout.removeWidget(self.plot_widget)
