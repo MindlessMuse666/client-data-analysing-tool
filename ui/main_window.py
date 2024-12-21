@@ -28,6 +28,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.choice_button.clicked.connect(self._on_choice_button_clicked)
         self.save_button.clicked.connect(self.save_to_db)
         self.build_graph_button.clicked.connect(self.plot_chart)
+        self.sort_button.clicked.connect(self.sort_data)
         self.comboBox.currentIndexChanged.connect(self.update_plot_button)
         self.comboBox_2.currentIndexChanged.connect(self.update_plot_button)
         self.comboBox_3.currentIndexChanged.connect(self.update_plot_button)
@@ -62,12 +63,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Критическая ошибка", f"Ошибка при загрузке файла: {e}")
 
+    def sort_data(self):
+        column_name = self.sort_column_combo.currentText()
+        sort_order = self.sort_order_combo.currentText()
+        if column_name:
+            try:
+                ascending = sort_order == "Возрастанию"
+                self.data_handler.sort_dataframe(column_name, ascending)
+                self.display_data(self.data_handler.df)
+            except KeyError:
+                QMessageBox.warning(self, "Ошибка", f"Столбец '{column_name}' не найден.")
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при сортировке: {e}")
+
     def display_data(self, df):
         model = PandasModel(df)
         self.data_table.setModel(model)
         self.comboBox_2.clear()
         self.comboBox_3.clear()
         self.comboBox_4.clear()
+        self.sort_column_combo.clear()  # Очищаем комбобокс столбцов
 
         self.data_table.setModel(model)
         self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -78,6 +93,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.comboBox_2.addItems(df.columns)
             self.comboBox_3.addItems(df.columns)
             self.comboBox_4.addItems(df.columns)
+            self.sort_column_combo.addItems(df.columns) # Добавляем столбцы в комбобокс для сортировки
+
         self.update_plot_button()
 
     def update_plot_button(self):

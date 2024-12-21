@@ -75,3 +75,6 @@ class DataHandler:
         finally:
             if conn:
                 conn.close()
+
+    def sort_dataframe(self, column_name, ascending):
+        self.df.sort_values(by=column_name, ascending=ascending, inplace=True)
