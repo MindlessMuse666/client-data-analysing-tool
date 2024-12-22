@@ -52,6 +52,9 @@
 ## GUI приложения (от 21.12):
 ![image](https://github.com/user-attachments/assets/45c2f79d-3b58-4d36-ae41-36b23704e203)
 
+## GUI приложения (от 22.12):
+![image](https://github.com/user-attachments/assets/df088e7a-e127-49e9-9593-129c69a11941)
+
 ---
 
 # Авторы проекта:
