@@ -2,37 +2,34 @@ import os
 
 import matplotlib.pyplot as plt
 from PyQt6.QtCore import pyqtSlot, Qt
-from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QFileDialog, QMessageBox, QMainWindow, QStyledItemDelegate, QHeaderView, QVBoxLayout,
                              QWidget)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from data_processing.data_handling import DataHandler
-from frontend.client_data_analising_tool import Ui_MainWindow
+from frontend.client_data_analising_tool import GuiMainWindow
 from model.pandas_model import PandasModel
 from plotting.plot_handler import PlotHandler
 
 
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow, GuiMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setupUi(self)
-        self.setWindowTitle("CheCloud")
-        self.setWindowIcon(QIcon("static/images/main_icon.ico"))
+        self.setup_gui(self)
 
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
         self.plot_widget = None
 
         self.choice_button.clicked.connect(self._on_choice_button_clicked)
-        self.save_button.clicked.connect(self.save_to_db)
+        # self.save_button.clicked.connect(self.data_handler.save_to_db())
         self.build_graph_button.clicked.connect(self.plot_chart)
         self.sort_button.clicked.connect(self.sort_data)
-        self.comboBox.currentIndexChanged.connect(self.update_plot_button)
-        self.comboBox_2.currentIndexChanged.connect(self.update_plot_button)
-        self.comboBox_3.currentIndexChanged.connect(self.update_plot_button)
-        self.comboBox_4.currentIndexChanged.connect(self.update_plot_button)
+        self.graph_type_combo_box.currentIndexChanged.connect(self.update_plot_button)
+        self.x_axis_combo_box.currentIndexChanged.connect(self.update_plot_button)
+        self.y_axis_combo_box.currentIndexChanged.connect(self.update_plot_button)
+        self.column_combo_box.currentIndexChanged.connect(self.update_plot_button)
 
         self.show()
         self.update_plot_button()
@@ -59,13 +56,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.data_handler.load_csv(file_name)
             self.display_data(self.data_handler.df)
             self.data_handler.save_last_file_path(file_name)
-            self.file_path_label.setText(f"Путь к файлу: {file_name}")
+            self.file_path_label.setText(file_name)
         except Exception as e:
             QMessageBox.critical(self, "Критическая ошибка", f"Ошибка при загрузке файла: {e}")
 
     def sort_data(self):
-        column_name = self.sort_column_combo.currentText()
-        sort_order = self.sort_order_combo.currentText()
+        column_name = self.sort_column_combo_box.currentText()
+        sort_order = self.sort_order_combo_box.currentText()
         if column_name:
             try:
                 ascending = sort_order == "Возрастанию"
@@ -79,10 +76,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def display_data(self, df):
         model = PandasModel(df)
         self.data_table.setModel(model)
-        self.comboBox_2.clear()
-        self.comboBox_3.clear()
-        self.comboBox_4.clear()
-        self.sort_column_combo.clear()  # Очищаем комбобокс столбцов
+        self.x_axis_combo_box.clear()
+        self.y_axis_combo_box.clear()
+        self.column_combo_box.clear()
+        self.sort_column_combo_box.clear()  # Очищаем комбобокс столбцов
 
         self.data_table.setModel(model)
         self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -90,25 +87,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data_table.setItemDelegate(delegate)
 
         if not df.empty:
-            self.comboBox_2.addItems(df.columns)
-            self.comboBox_3.addItems(df.columns)
-            self.comboBox_4.addItems(df.columns)
-            self.sort_column_combo.addItems(df.columns) # Добавляем столбцы в комбобокс для сортировки
+            self.x_axis_combo_box.addItems(df.columns)
+            self.y_axis_combo_box.addItems(df.columns)
+            self.column_combo_box.addItems(df.columns)
+            self.sort_column_combo_box.addItems(df.columns) # Добавляем столбцы в комбобокс для сортировки
 
         self.update_plot_button()
 
     def update_plot_button(self):
-        chart_type = self.comboBox.currentText()
+        chart_type = self.graph_type_combo_box.currentText()
         enabled = not self.data_handler.df.empty
 
-        self.comboBox_2.setVisible(chart_type == "Диаграмма рассеяния")
-        self.comboBox_3.setVisible(chart_type == "Диаграмма рассеяния")
-        self.comboBox_4.setVisible(chart_type != "Диаграмма рассеяния")
+        x_axis_visible = chart_type == "Диаграмма рассеяния"
+        y_axis_visible = chart_type == "Диаграмма рассеяния"
+        column_visible = chart_type != "Диаграмма рассеяния"
+
+        self.x_axis_label.setVisible(x_axis_visible)
+        self.y_axis_label.setVisible(y_axis_visible)
+        self.column_label.setVisible(column_visible)
+
+        self.x_axis_combo_box.setVisible(x_axis_visible)
+        self.y_axis_combo_box.setVisible(y_axis_visible)
+        self.column_combo_box.setVisible(column_visible)
 
         if chart_type == "Диаграмма рассеяния":
-            enabled = enabled and self.comboBox_2.count() > 0 and self.comboBox_3.count() > 0 and self.comboBox_2.currentIndex() != -1 and self.comboBox_3.currentIndex() != -1
+            enabled = enabled and self.x_axis_combo_box.count() > 0 and self.y_axis_combo_box.count() > 0 and self.x_axis_combo_box.currentIndex() != -1 and self.y_axis_combo_box.currentIndex() != -1
         elif chart_type in ["Гистограмма", "Линейный график", "Столбчатая диаграмма", "Круговая диаграмма"]:
-            enabled = enabled and self.comboBox_4.count() > 0 and self.comboBox_4.currentIndex() != -1
+            enabled = enabled and self.column_combo_box.count() > 0 and self.column_combo_box.currentIndex() != -1
 
         self.build_graph_button.setEnabled(enabled)
 
@@ -133,10 +138,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "Ошибка", f"Ошибка при построении графика: {e}")
 
     def _get_plot_parameters(self):
-        chart_type = self.comboBox.currentText()
-        x_axis = self.comboBox_2.currentText() if chart_type == "Диаграмма рассеяния" else None
-        y_axis = self.comboBox_3.currentText() if chart_type == "Диаграмма рассеяния" else None
-        column = self.comboBox_4.currentText() if chart_type != "Диаграмма рассеяния" else None
+        chart_type = self.graph_type_combo_box.currentText()
+        x_axis = self.x_axis_combo_box.currentText() if chart_type == "Диаграмма рассеяния" else None
+        y_axis = self.y_axis_combo_box.currentText() if chart_type == "Диаграмма рассеяния" else None
+        column = self.column_combo_box.currentText() if chart_type != "Диаграмма рассеяния" else None
         return chart_type, x_axis, y_axis, column
 
     def _validate_plot_parameters(self, chart_type, x_axis, y_axis, column):
@@ -151,14 +156,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _show_plot_widget(self, fig):
         if self.plot_widget:
-            self.gridLayout.removeWidget(self.plot_widget)
+            self.plot_settings_layout.removeWidget(self.plot_widget)
             self.plot_widget.deleteLater()
-        self.plot_widget = PlotWidget(fig)
-        self.plot_widget.setWindowTitle("График")
-        self.plot_widget.showMaximized()
-
-    def save_to_db(self):
-        self.data_handler.save_to_db()
+        self.plot_widget = FigureCanvas(fig) # Изменение здесь
+        self.plot_settings_layout.addWidget(self.plot_widget)
+        self.plot_widget.draw() # Добавлено для отображения графика
 
 
 class AlignDelegate(QStyledItemDelegate):

@@ -1,539 +1,220 @@
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QMetaObject, QSize
+from PyQt6.QtGui import QIcon, QPixmap, QFont
+from PyQt6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QGridLayout, QComboBox, QTableView, \
+    QStatusBar, QSizePolicy, QLayout, QHeaderView
+
+from static.resources.resource_pathes.resource_pathes import (choice_icon_path, save_icon_path, graph_icon_path,
+                                                              main_icon_path)
+from static.styles.styles import button_style, label_style, combobox_style, tableview_style, application_style
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        """ Общие настройки """
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1280, 720)
-        font = QtGui.QFont()
+def _get_icon(icon_path: str):
+    icon: QIcon = QIcon()
+    icon.addPixmap(
+        QPixmap(icon_path),
+        QIcon.Mode.Normal,
+        QIcon.State.Off
+    )
+    return icon
+
+def _get_label(label_text: str):
+    label: QLabel = QLabel(label_text)  # Новый QLabel
+    label.setStyleSheet(label_style)
+    label.setSizePolicy(
+        QSizePolicy.Policy.Maximum,
+        QSizePolicy.Policy.Maximum
+    )
+    return label
+
+
+class GuiMainWindow(object):
+    def setup_gui(self, MainWindow):
+        MainWindow.setObjectName("main_window")
+        # MainWindow.resize(1280, 720)
+        MainWindow.setWindowTitle("CheCloud")
+
+        """ Устанавливаем иконку приложения """
+        main_icon: QIcon = _get_icon(main_icon_path)
+        icon_size = QSize(24, 24)
+        MainWindow.setWindowIcon(main_icon)
+        MainWindow.setIconSize(icon_size)
+
+        """ Устанавливаем шрифт приложения """
+        font = QFont()
         font.setFamily("Secession Text")
         font.setPointSize(16)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
         MainWindow.setFont(font)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("static/resources/main_icon.ico"),
-                       QtGui.QIcon.Mode.Normal,
-                       QtGui.QIcon.State.Off)
-        MainWindow.setWindowIcon(icon)
-        MainWindow.setStatusTip("")
+
+        """ Устанавливаем дополнительные настройки приложения """
         MainWindow.setAutoFillBackground(False)
-        MainWindow.setStyleSheet("background-color: qlineargradient(\n"
-"   spread:pad,\n"
-"   x1:0,\n"
-"   y1:0,\n"
-"   x2:1,\n"
-"   y2:1,\n"
-"   stop:0 #c8d9e6,\n"
-"   stop:1 #567c8d\n"
-");\n"
-"font: 16pt \"Secession Text\";")
-        MainWindow.setIconSize(QtCore.QSize(24, 24))
+        # MainWindow.setStatusTip("")
+
+        """ Устанавливаем css-стиль приложения """
+        MainWindow.setStyleSheet(application_style)
 
 
-        self.central_widget = QtWidgets.QWidget(parent=MainWindow)
-        self.central_widget.setEnabled(True)
+        """ Вертикальный layout для всего окна """
+        self.central_widget = QWidget(MainWindow)
         self.central_widget.setObjectName("central_widget")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.central_widget)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.main_layout = QtWidgets.QFrame(parent=self.central_widget)
-        self.main_layout.setStyleSheet("")
+        self.central_widget.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.main_layout = QVBoxLayout(self.central_widget)
         self.main_layout.setObjectName("main_layout")
-
-        self.gridLayout = QtWidgets.QGridLayout(self.main_layout)
-        self.gridLayout.setObjectName("gridLayout")
-        self.gridLayout.setSpacing(0) # Убираем отступы между элементами
-
-        self.comboBox_4 = QtWidgets.QComboBox(parent=self.main_layout)
-        self.comboBox_4.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.comboBox_4.setObjectName("comboBox_4")
-        self.gridLayout.addWidget(self.comboBox_4, 2, 1, 1, 1)
-
-        self.comboBox_2 = QtWidgets.QComboBox(parent=self.main_layout)
-        self.comboBox_2.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   color: #2f4156;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.comboBox_2.setObjectName("comboBox_2")
-        self.gridLayout.addWidget(self.comboBox_2, 2, 2, 1, 1)
-
-        self.main_buttons_panel = QtWidgets.QFrame(parent=self.main_layout)
-        self.main_buttons_panel.setObjectName("main_buttons_panel")
-        self.main_buttons_panel.setStyleSheet("background-color: transparent;") # Убираем фон # self.main_buttons_panel.setStyleSheet("background-color: rgbargba(200, 217, 230, 0);")
-        self.main_buttons_panel.setEnabled(True)
-
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.main_buttons_panel)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.gridLayout_3.setSpacing(10) # Небольшой отступ между кнопками
-
-        """ Кнопка "Выбрать файл" """
-        self.choice_button = QtWidgets.QPushButton(parent=self.main_buttons_panel)
-        self.choice_button.setObjectName("choice_button")
-        self.choice_button.setStyleSheet("QPushButton {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"}\n"
-"QPushButton:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"QPushButton:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("static/resources/file_draft_24dp.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.choice_button.setIcon(icon1)
-        self.choice_button.setIconSize(QtCore.QSize(24, 24))
-        self.gridLayout_3.addWidget(self.choice_button, 0, 1, 1, 1)
-
-        """ Кнопка "Сохранить данные" """
-        self.save_button = QtWidgets.QPushButton(parent=self.main_buttons_panel)
-        self.save_button.setStyleSheet("QPushButton {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"}\n"
-"QPushButton:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"QPushButton:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("static/resources/save_24dp.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.save_button.setIcon(icon2)
-        self.save_button.setIconSize(QtCore.QSize(24, 24))
-        self.save_button.setObjectName("save_button")
-        self.gridLayout_3.addWidget(self.save_button, 0, 2, 1, 1)
-
-        """ Кнопка "Построить график" """
-        self.build_graph_button = QtWidgets.QPushButton(parent=self.main_layout)
-        self.build_graph_button.setObjectName("build_graph_button")
-        self.build_graph_button.setStyleSheet("QPushButton {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"}\n"
-"QPushButton:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"QPushButton:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("static/resources/graph_24dp.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
-        self.build_graph_button.setIcon(icon3)
-        self.build_graph_button.setIconSize(QtCore.QSize(24, 24))
+        self.main_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
 
 
-        self.save_button.raise_()
-        self.build_graph_button.raise_()
-        self.choice_button.raise_()
+        """ Верхняя панель: Путь к файлу, кнопки "Выбрать файл" и "Сохранить данные" """
+        self.file_path_info_label: QLabel = _get_label("Путь к файлу:")
+        self.top_panel = QWidget(self.central_widget)
+        self.top_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Minimum
+        )
+        self.top_panel_layout = QHBoxLayout(self.top_panel)
+        # self.top_panel_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self.top_panel_layout.addWidget(self.file_path_info_label)
 
-        self.gridLayout.addWidget(self.main_buttons_panel, 1, 0, 1, 4)
+        self.file_path_label: QLabel = _get_label("")
+        self.file_path_label.setParent(self.top_panel)
+        self.top_panel_layout.addWidget(self.file_path_label)
 
+        self.choice_button = QPushButton("Выбрать файл")
+        self.choice_button.setStyleSheet(button_style)
+        choice_icon: QIcon = _get_icon(choice_icon_path)
+        self.choice_button.setIcon(choice_icon)
+        self.choice_button.setIconSize(icon_size)
+        self.top_panel_layout.addWidget(self.choice_button)
 
+        self.save_button = QPushButton("Сохранить данные")
+        self.save_button.setStyleSheet(button_style)
+        save_icon: QIcon = _get_icon(save_icon_path)
+        self.save_button.setIcon(save_icon)
+        self.save_button.setIconSize(icon_size)
+        self.top_panel_layout.addWidget(self.save_button)
 
-        self.comboBox = QtWidgets.QComboBox(parent=self.main_layout)
-        self.comboBox.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"/* Дополнительный стиль для лучшей читаемости */\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.comboBox.setIconSize(QtCore.QSize(24, 24))
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-
-        self.gridLayout.addWidget(self.comboBox, 2, 0, 1, 1)
-        self.comboBox_3 = QtWidgets.QComboBox(parent=self.main_layout)
-        self.comboBox_3.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"/* Дополнительный стиль для лучшей читаемости */\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.comboBox_3.setObjectName("comboBox_3")
-        self.gridLayout.addWidget(self.comboBox_3, 2, 3, 1, 1)
-
-        """ Отображение: 
-                Кнопки "Построить график"; 
-                Типа графика;
-                Трёх списков выбора столбцов для постройки графика. """
-        self.gridLayout.addWidget(self.build_graph_button, 2, 0, 1, 1)
-        self.gridLayout.addWidget(self.comboBox, 2, 1, 1, 1)
-        self.gridLayout.addWidget(self.comboBox_4, 2, 2, 1, 1)
-        self.gridLayout.addWidget(self.comboBox_2, 2, 3, 1, 1)
-        self.gridLayout.addWidget(self.comboBox_3, 2, 4, 1, 1)
+        self.main_layout.addWidget(self.top_panel)
 
 
-        """ Текст "Путь к файлу" """
-        self.file_path_label = QtWidgets.QLabel(parent=self.main_layout)
-        self.file_path_label.setObjectName("file_path_label")
-        self.file_path_label.setStyleSheet("QLabel {\n"
-                                           "   color: #2f4156;\n"
-                                           "   background-color: #f5efeb;\n"
-                                           "   font: 14pt \"Secession Light\";\n"
-                                           "   border: 2px solid #567c8d;\n"
-                                           "   border-radius: 8px;\n"
-                                           "   padding: 3px;\n"
-                                           "}")
-        self.file_path_label.setMinimumSize(QtCore.QSize(0, 0))
-        self.file_path_label.setMouseTracking(False)
-        self.file_path_label.setAutoFillBackground(False)
-        self.file_path_label.setTextFormat(QtCore.Qt.TextFormat.AutoText)
-        self.file_path_label.setScaledContents(False)
-        self.file_path_label.setWordWrap(False)
-        self.file_path_label.setOpenExternalLinks(False)
-        self.gridLayout.addWidget(self.file_path_label, 0, 0, 1, 4)
+        """ Панель настроек графика """
+        self.graph_type_label: QLabel = _get_label("Тип графика:")
+        self.plot_settings_panel = QWidget(self.central_widget)
+        self.plot_settings_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Minimum
+        )
+        self.plot_settings_layout = QGridLayout(self.plot_settings_panel)
+        # self.plot_settings_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self.plot_settings_layout.addWidget(self.graph_type_label, 0, 0)
+
+        self.graph_type_combo_box = QComboBox() # comboBox
+        self.graph_type_combo_box.addItems([
+            "Гистограмма",
+            "Диаграмма рассеяния",
+            "Линейный график",
+            "Столбчатая диаграмма",
+            "Круговая диаграмма"
+        ])
+        self.graph_type_combo_box.setStyleSheet(combobox_style)
+        self.plot_settings_layout.addWidget(self.graph_type_combo_box, 0, 1)
+
+        self.x_axis_label: QLabel = _get_label("Ось X:")
+        self.x_axis_combo_box = QComboBox() # comboBox_2
+        self.x_axis_combo_box.setStyleSheet(combobox_style)
+        self.plot_settings_layout.addWidget(self.x_axis_label, 1, 0)
+        self.plot_settings_layout.addWidget(self.x_axis_combo_box, 1, 1)
+
+        self.y_axis_label: QLabel = _get_label("Ось Y:")
+        self.y_axis_combo_box = QComboBox() # comboBox_3
+        self.y_axis_combo_box.setStyleSheet(combobox_style)
+        self.plot_settings_layout.addWidget(self.y_axis_label, 2, 0)
+        self.plot_settings_layout.addWidget(self.y_axis_combo_box, 2, 1)
+
+        self.column_label: QLabel = _get_label("Столбец:")
+        self.column_combo_box = QComboBox() # comboBox_4
+        self.column_combo_box.setStyleSheet(combobox_style)
+        self.plot_settings_layout.addWidget(self.column_label, 3, 0)
+        self.plot_settings_layout.addWidget(self.column_combo_box, 3, 1)
+
+        self.build_graph_button = QPushButton("Построить график")
+        self.build_graph_button.setStyleSheet(button_style)
+        graph_icon: QIcon = _get_icon(graph_icon_path)
+        self.build_graph_button.setIcon(graph_icon)
+        self.build_graph_button.setIconSize(icon_size)
+        self.plot_settings_layout.addWidget(self.build_graph_button, 4, 0, 1, 2)
+
+        self.main_layout.addWidget(self.plot_settings_panel)
 
 
-        # UI сортировки данных
-        self.sort_column_combo = QtWidgets.QComboBox(parent=self.main_layout)
-        self.sort_column_combo.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"/* Дополнительный стиль для лучшей читаемости */\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.sort_column_combo.setObjectName("sort_column_combo")
+        """ Панель сортировки """
+        self.sort_panel = QWidget(self.central_widget)
+        self.sort_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Minimum
+        )
+        self.sort_panel_layout_label: QLabel = _get_label("Сортировать по:")
+        self.sort_panel_layout = QHBoxLayout(self.sort_panel)
+        # self.sort_panel_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self.sort_panel_layout.addWidget(self.sort_panel_layout_label)
 
-        self.sort_order_combo = QtWidgets.QComboBox(parent=self.main_layout)
-        self.sort_order_combo.setStyleSheet("QComboBox {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"   min-height: 20px;\n"
-"}\n"
-"\n"
-"QComboBox:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"\n"
-"QComboBox:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n"
-"\n"
-"/* Стиль для раскрывающегося списка */\n"
-"QComboBox::drop-down {\n"
-"   subcontrol-origin: padding;\n"
-"   subcontrol-position: top right;\n"
-"   width: 20px;\n"
-"   border-left: 2px solid #567c8d;\n"
-"   border-top-right-radius: 8px;\n"
-"   border-bottom-right-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"   image: url(static/resources/arrow_down_24dp.svg);\n"
-"}\n"
-"\n"
-"\n"
-"/* Дополнительный стиль для лучшей читаемости */\n"
-"QComboBox QAbstractItemView {\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;"
-"   selection-background-color: #c8d9e6;\n"
-"}")
-        self.sort_order_combo.setObjectName("sort_order_combo")
-        self.sort_order_combo.addItems(["Возрастанию", "Убыванию"])
+        self.sort_column_combo_box = QComboBox()
+        self.sort_column_combo_box.setStyleSheet(combobox_style)
+        self.sort_panel_layout.addWidget(self.sort_column_combo_box)
 
-        self.sort_button = QtWidgets.QPushButton(parent=self.main_layout)
-        self.sort_button.setStyleSheet("QPushButton {\n"
-"   background-color: #f5efeb;\n"
-"   color: #2f4156;\n"
-"   border: 2px solid #567c8d;\n"
-"   border-radius: 8px;\n"
-"   padding: 12px 25px;\n"
-"}\n"
-"QPushButton:hover {\n"
-"   background-color: #e0d6cd;\n"
-"}\n"
-"QPushButton:pressed {\n"
-"   background-color: #c8d9e6;\n"
-"   padding-top: 12px;\n"
-"   padding-bottom: 10px;\n"
-"}\n")
-        self.sort_button.setText("Отсортировать")
-        self.sort_button.setObjectName("sort_button")
+        self.sort_order_combo_box = QComboBox()
+        self.sort_order_combo_box.setStyleSheet(combobox_style)
+        self.sort_order_combo_box.addItems([
+            "Возрастанию",
+            "Убыванию"
+        ])
+        self.sort_panel_layout.addWidget(self.sort_order_combo_box)
+
+        self.sort_button = QPushButton("Отсортировать")
+        self.sort_button.setStyleSheet(button_style)
+        self.sort_panel_layout.addWidget(self.sort_button)
+
+        self.main_layout.addWidget(self.sort_panel)
 
 
-        """ Отображение: 
-                Кнопки "Отсортировать"; 
-                Столбца сортировки;
-                Типа сортировки. """
-        self.gridLayout.addWidget(self.sort_button, 3, 0, 1, 1)
-        self.gridLayout.addWidget(self.sort_column_combo, 3, 1, 1, 2)
-        self.gridLayout.addWidget(self.sort_order_combo, 3, 3, 1, 2)
+        """ QSplitter для адаптивного макета таблицы и графика """
+        # splitter = QSplitter(
+        #     Qt.Orientation.Vertical,
+        #     self.central_widget
+        # )
+        # splitter.setStyleSheet(layout_style)
+        # splitter.setSizePolicy(
+        #     QSizePolicy.Policy.Expanding,
+        #     QSizePolicy.Policy.Expanding
+        # )
+
+        self.data_table = QTableView()
+        self.data_table.setStyleSheet(tableview_style)
+        self.data_table.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.data_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
+        self.data_table.setMinimumSize(QSize(0, 0))
+
+        self.main_layout.addWidget(self.data_table)
+        # splitter.addWidget(self.data_table)
+        #
+        # self.plot_area = QWidget()
+        # splitter.addWidget(self.plot_area)
+        #
+        # self.main_layout.addWidget(splitter)
 
 
-        """ Основная таблица с данными """
-        self.data_table = QtWidgets.QTableView(parent=self.main_layout)
-        self.data_table.setObjectName("data_table")
-        self.data_table.setStyleSheet("QTableView {\n"
-                                      "   background-color: #f5efeb;\n"
-                                      "   gridline-color: #d0d0d0;\n"
-                                      "   border: 2px solid #567c8d;\n"
-                                      "   border-radius: 8px;\n"
-                                      "   color: #2f4156;\n"
-                                      "}\n"
-                                      "QHeaderView::section { /* Заголовки столбцов */\n"
-                                      "   background-color: #e0d6cd; /* Светло-бежевый фон заголовков */\n"
-                                      "   color: #2f4156; /* Темно-синий текст заголовков */\n"
-                                      "   border: 1px solid #d0d0d0;\n"
-                                      "   padding: 5px;\n"
-                                      "}\n"
-                                      "QTableView QAbstractItemView::item {\n"
-                                      "   border: 0.5px solid #e0d6cd;\n"
-                                      "   color: #2f4156;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QTableView::item:selected{\n"
-                                      "   background-color: #c8d9e6;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QTableView::item:hover{\n"
-                                      "   background-color: #e0d6cd;\n"
-                                      "}\n")
-        self.data_table.setMinimumSize(QtCore.QSize(0, 0))
-        self.gridLayout.addWidget(self.data_table, 4, 0, 1, 5)  # Сдвинули вниз на 2 строки
-
-
-        self.gridLayout_2.addWidget(self.main_layout, 0, 0, 1, 1)
+        """ Установка центрального виджета """
         MainWindow.setCentralWidget(self.central_widget)
-        self.status_bar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.status_bar = QStatusBar(MainWindow)
         self.status_bar.setObjectName("status_bar")
         MainWindow.setStatusBar(self.status_bar)
 
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "CheCloud"))
-        self.choice_button.setText(_translate("MainWindow", "Выбрать файл"))
-        self.save_button.setText(_translate("MainWindow", "Сохранить данные"))
-        self.build_graph_button.setText(_translate("MainWindow", "Построить график"))
-        self.comboBox.setItemText(0, _translate("MainWindow", "Гистограмма"))
-        self.comboBox.setItemText(1, _translate("MainWindow", "Диаграмма рассеяния"))
-        self.comboBox.setItemText(2, _translate("MainWindow", "Линейный график"))
-        self.comboBox.setItemText(3, _translate("MainWindow", "Столбчатая диаграмма"))
-        self.comboBox.setItemText(4, _translate("MainWindow", "Круговая диаграмма"))
-        self.file_path_label.setText(_translate("MainWindow", "Путь к файлу: "))
+        QMetaObject.connectSlotsByName(MainWindow)
