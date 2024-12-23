@@ -11,7 +11,7 @@ class DataHandler:
 
     def load_csv(self, file_name):
         try:
-            self.df = pd.read_csv(file_name, sep=';', encoding='cp1251', on_bad_lines='skip')
+            self.df = pd.read_csv(file_name, sep=';', encoding='utf-8', on_bad_lines='skip')
             self.save_to_db()  # Сохраняем сразу после загрузки
         except Exception as e:
             QMessageBox.critical(None, "Ошибка", f"Ошибка при загрузке CSV: {e}")

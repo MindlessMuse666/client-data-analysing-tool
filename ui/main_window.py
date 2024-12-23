@@ -31,7 +31,7 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.y_axis_combo_box.currentIndexChanged.connect(self.update_plot_button)
         self.column_combo_box.currentIndexChanged.connect(self.update_plot_button)
 
-        self.show()
+        self.showMaximized()
         self.update_plot_button()
         self.open_file()
 
