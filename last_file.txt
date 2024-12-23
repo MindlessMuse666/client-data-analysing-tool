@@ -1,1 +1,1 @@
-C:/Users/bukar/Documents/GitHub/client-data-analysing-tool/big_data/test_data_csv/testdata2.csv
+C:/Users/vlad/Desktop/fitness_test_data.csv

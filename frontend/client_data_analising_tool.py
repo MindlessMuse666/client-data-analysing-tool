@@ -30,7 +30,6 @@ def _get_label(label_text: str):
 class GuiMainWindow(object):
     def setup_gui(self, MainWindow):
         MainWindow.setObjectName("main_window")
-        # MainWindow.resize(1280, 720)
         MainWindow.setWindowTitle("CheCloud")
 
         """ Устанавливаем иконку приложения """
@@ -50,7 +49,6 @@ class GuiMainWindow(object):
 
         """ Устанавливаем дополнительные настройки приложения """
         MainWindow.setAutoFillBackground(False)
-        # MainWindow.setStatusTip("")
 
         """ Устанавливаем css-стиль приложения """
         MainWindow.setStyleSheet(application_style)
@@ -76,7 +74,6 @@ class GuiMainWindow(object):
             QSizePolicy.Policy.Minimum
         )
         self.top_panel_layout = QHBoxLayout(self.top_panel)
-        # self.top_panel_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self.top_panel_layout.addWidget(self.file_path_info_label)
 
         self.file_path_label: QLabel = _get_label("")
@@ -108,7 +105,6 @@ class GuiMainWindow(object):
             QSizePolicy.Policy.Minimum
         )
         self.plot_settings_layout = QGridLayout(self.plot_settings_panel)
-        # self.plot_settings_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self.plot_settings_layout.addWidget(self.graph_type_label, 0, 0)
 
         self.graph_type_combo_box = QComboBox() # comboBox
@@ -179,18 +175,6 @@ class GuiMainWindow(object):
 
         self.main_layout.addWidget(self.sort_panel)
 
-
-        """ QSplitter для адаптивного макета таблицы и графика """
-        # splitter = QSplitter(
-        #     Qt.Orientation.Vertical,
-        #     self.central_widget
-        # )
-        # splitter.setStyleSheet(layout_style)
-        # splitter.setSizePolicy(
-        #     QSizePolicy.Policy.Expanding,
-        #     QSizePolicy.Policy.Expanding
-        # )
-
         self.data_table = QTableView()
         self.data_table.setStyleSheet(tableview_style)
         self.data_table.setSizePolicy(
@@ -203,12 +187,19 @@ class GuiMainWindow(object):
         self.data_table.setMinimumSize(QSize(0, 0))
 
         self.main_layout.addWidget(self.data_table)
-        # splitter.addWidget(self.data_table)
-        #
-        # self.plot_area = QWidget()
-        # splitter.addWidget(self.plot_area)
-        #
-        # self.main_layout.addWidget(splitter)
+
+
+        """ Панель для отчета """
+        self.report_panel = QWidget(self.central_widget)
+        self.report_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Minimum
+        )
+        self.report_panel_layout = QHBoxLayout(self.report_panel)
+        self.report_button = QPushButton("Создать отчёт")
+        self.report_button.setStyleSheet(button_style)
+        self.report_panel_layout.addWidget(self.report_button)
+        self.main_layout.addWidget(self.report_panel)
 
 
         """ Установка центрального виджета """

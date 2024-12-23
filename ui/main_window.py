@@ -3,10 +3,12 @@ import os
 import matplotlib.pyplot as plt
 from PyQt6.QtCore import pyqtSlot, Qt
 from PyQt6.QtWidgets import (QFileDialog, QMessageBox, QMainWindow, QStyledItemDelegate, QHeaderView, QVBoxLayout,
-                             QWidget, QDialog)  # Добавили QDialog
+                             QDialog)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import pandas as pd
 
 from data_processing.data_handling import DataHandler
+from data_processing.report_generator import ReportGenerator
 from frontend.client_data_analising_tool import GuiMainWindow
 from model.pandas_model import PandasModel
 from plotting.plot_handler import PlotHandler
@@ -21,9 +23,11 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
         self.plot_window = None  # Изменили на PlotWindow
+        self.report_generator = ReportGenerator()
 
         self.choice_button.clicked.connect(self._on_choice_button_clicked)
         self.save_button.clicked.connect(self._on_save_button_clicked)  # Добавили обработчик кнопки
+        self.report_button.clicked.connect(self._on_report_button_clicked)
         self.build_graph_button.clicked.connect(self.plot_chart)
         self.sort_button.clicked.connect(self.sort_data)
         self.graph_type_combo_box.currentIndexChanged.connect(self.update_plot_button)
@@ -114,9 +118,9 @@ class MainWindow(QMainWindow, GuiMainWindow):
         chart_type = self.graph_type_combo_box.currentText()
         enabled = not self.data_handler.df.empty
 
-        x_axis_visible = chart_type == "Диаграмма рассеяния"
-        y_axis_visible = chart_type == "Диаграмма рассеяния"
-        column_visible = chart_type != "Диаграмма рассеяния"
+        x_axis_visible = chart_type in ["Диаграмма рассеяния", "Линейный график"]
+        y_axis_visible = chart_type in ["Диаграмма рассеяния", "Линейный график"]
+        column_visible = chart_type not in ["Диаграмма рассеяния", "Линейный график"]
 
         self.x_axis_label.setVisible(x_axis_visible)
         self.y_axis_label.setVisible(y_axis_visible)
@@ -128,7 +132,9 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
         if chart_type == "Диаграмма рассеяния":
             enabled = enabled and self.x_axis_combo_box.count() > 0 and self.y_axis_combo_box.count() > 0 and self.x_axis_combo_box.currentIndex() != -1 and self.y_axis_combo_box.currentIndex() != -1
-        elif chart_type in ["Гистограмма", "Линейный график", "Столбчатая диаграмма", "Круговая диаграмма"]:
+        elif chart_type == "Линейный график":
+            enabled = enabled and self.x_axis_combo_box.count() > 0 and self.y_axis_combo_box.count() > 0 and self.x_axis_combo_box.currentIndex() != -1 and self.y_axis_combo_box.currentIndex() != -1
+        elif chart_type in ["Гистограмма", "Столбчатая диаграмма", "Круговая диаграмма"]:
             enabled = enabled and self.column_combo_box.count() > 0 and self.column_combo_box.currentIndex() != -1
 
         self.build_graph_button.setEnabled(enabled)
@@ -151,9 +157,9 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
     def _get_plot_parameters(self):
         chart_type = self.graph_type_combo_box.currentText()
-        x_axis = self.x_axis_combo_box.currentText() if chart_type == "Диаграмма рассеяния" else None
-        y_axis = self.y_axis_combo_box.currentText() if chart_type == "Диаграмма рассеяния" else None
-        column = self.column_combo_box.currentText() if chart_type != "Диаграмма рассеяния" else None
+        x_axis = self.x_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния", "Линейный график"] else None
+        y_axis = self.y_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния", "Линейный график"] else None
+        column = self.column_combo_box.currentText() if chart_type not in ["Диаграмма рассеяния", "Линейный график"] else None
         return chart_type, x_axis, y_axis, column
 
     def _validate_plot_parameters(self, chart_type, x_axis, y_axis, column):
@@ -161,7 +167,14 @@ class MainWindow(QMainWindow, GuiMainWindow):
             if not x_axis or not y_axis:
                 QMessageBox.warning(self, "Ошибка", "Для диаграммы рассеяния необходимо выбрать оси X и Y.")
                 return False
-        elif chart_type != "Диаграмма рассеяния" and not column:
+        elif chart_type == "Линейный график":
+             if not x_axis or not y_axis:
+                 QMessageBox.warning(self, "Ошибка", "Для линейного графика необходимо выбрать оси X и Y.")
+                 return False
+             if not (pd.api.types.is_numeric_dtype(self.data_handler.df[x_axis]) and pd.api.types.is_numeric_dtype(self.data_handler.df[y_axis])):
+                 QMessageBox.warning(self, "Ошибка", "Оси X и Y должны содержать числовые данные.")
+                 return False
+        elif chart_type not in ["Диаграмма рассеяния", "Линейный график"] and not column:
             QMessageBox.warning(self, "Ошибка", f"Для {chart_type} необходимо выбрать столбец.")
             return False
         return True
@@ -171,6 +184,28 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.data_handler.save_to_db()
         QMessageBox.information(self, "Успех", "Данные успешно сохранены в базу данных.")
 
+
+    @pyqtSlot()
+    def _on_report_button_clicked(self):
+        if self.data_handler.df.empty:
+            QMessageBox.warning(self, "Ошибка", "Нет данных для создания отчёта.")
+            return
+        self._save_report_to_file()
+
+
+    def _save_report_to_file(self):
+        file_dialog = QFileDialog(self)
+        file_dialog.setDefaultSuffix(".pdf")
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        file_dialog.setNameFilter("PDF files (*.pdf)")
+        file_path, _ = file_dialog.getSaveFileName(self, "Сохранить отчёт", "", "PDF files (*.pdf)")
+
+        if file_path:
+            try:
+               self.report_generator.generate_report(self.data_handler.df, file_path)
+               QMessageBox.information(self, "Успех", f"Отчет сохранен в {file_path}")
+            except Exception as e:
+               QMessageBox.critical(self, "Ошибка", f"Ошибка сохранения отчета: {e}")
 
 class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
@@ -199,5 +234,11 @@ class PlotWindow(QDialog):  # Изменили на QDialog
         self.plot_chart()
 
     def plot_chart(self):
-        if self.plot_handler.plot(self.df, self.chart_type, self.x_axis, self.y_axis, self.column, self.ax):
+        try:
+            if not self.plot_handler.plot(self.df, self.chart_type, self.x_axis, self.y_axis, self.column, self.ax):
+                plt.close(self.figure)
+                return
             self.canvas.draw()
+        except Exception:
+            plt.close(self.figure)
+            return
