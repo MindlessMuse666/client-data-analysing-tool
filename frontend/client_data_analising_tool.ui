@@ -340,6 +340,7 @@ QComboBox:pressed {
 QComboBox::drop-down {
   subcontrol-origin: padding;
   subcontrol-position: top right;
+  color: #2f4156;
   width: 20px;
   border-left: 2px solid #567c8d; /* Сохраняем общий стиль границы */
   border-top-right-radius: 8px;
@@ -357,6 +358,7 @@ QComboBox QAbstractItemView {
     border: 2px solid #567c8d;
     border-radius: 8px;
     background-color: #f5efeb;
+	
     selection-background-color: #c8d9e6;
 }</string>
          </property>
