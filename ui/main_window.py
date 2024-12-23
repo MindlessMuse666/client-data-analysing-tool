@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 from PyQt6.QtCore import pyqtSlot, Qt
 from PyQt6.QtWidgets import (QFileDialog, QMessageBox, QMainWindow, QStyledItemDelegate, QHeaderView, QVBoxLayout,
-                             QWidget)
+                             QWidget, QDialog)  # Добавили QDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from data_processing.data_handling import DataHandler
@@ -20,10 +20,10 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
-        self.plot_widget = None
+        self.plot_window = None  # Изменили на PlotWindow
 
         self.choice_button.clicked.connect(self._on_choice_button_clicked)
-        # self.save_button.clicked.connect(self.data_handler.save_to_db())
+        self.save_button.clicked.connect(self._on_save_button_clicked)  # Добавили обработчик кнопки
         self.build_graph_button.clicked.connect(self.plot_chart)
         self.sort_button.clicked.connect(self.sort_data)
         self.graph_type_combo_box.currentIndexChanged.connect(self.update_plot_button)
@@ -35,11 +35,17 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.update_plot_button()
         self.open_file()
 
+    def closeEvent(self, event):
+        self.data_handler.save_to_db()  # Сохраняем перед закрытием
+        event.accept()
+
     @pyqtSlot()
     def open_file(self):
         self.last_file_path = self.data_handler.load_last_file_path()
         if self.last_file_path and os.path.exists(self.last_file_path):
             self._load_and_display_data(self.last_file_path)
+            self.data_handler.load_from_db()  # Загружаем данные из БД при открытии
+            self.display_data(self.data_handler.df)
         else:
             self._on_choice_button_clicked()
 
@@ -50,6 +56,7 @@ class MainWindow(QMainWindow, GuiMainWindow):
         file_name, _ = self._open_file_dialog()
         if file_name:
             self._load_and_display_data(file_name)
+            self.data_handler.save_to_db()
 
     def _load_and_display_data(self, file_name):
         try:
@@ -68,6 +75,7 @@ class MainWindow(QMainWindow, GuiMainWindow):
                 ascending = sort_order == "Возрастанию"
                 self.data_handler.sort_dataframe(column_name, ascending)
                 self.display_data(self.data_handler.df)
+                self.data_handler.save_to_db()
             except KeyError:
                 QMessageBox.warning(self, "Ошибка", f"Столбец '{column_name}' не найден.")
             except Exception as e:
@@ -86,13 +94,21 @@ class MainWindow(QMainWindow, GuiMainWindow):
         delegate = AlignDelegate()
         self.data_table.setItemDelegate(delegate)
 
+        # Устанавливаем связь с dataChanged после установки модели
+        self.data_table.model().dataChanged.connect(self._on_data_changed)
+
         if not df.empty:
             self.x_axis_combo_box.addItems(df.columns)
             self.y_axis_combo_box.addItems(df.columns)
             self.column_combo_box.addItems(df.columns)
-            self.sort_column_combo_box.addItems(df.columns) # Добавляем столбцы в комбобокс для сортировки
+            self.sort_column_combo_box.addItems(df.columns)  # Добавляем столбцы в комбобокс для сортировки
 
         self.update_plot_button()
+
+    def _on_data_changed(self, topLeft, bottomRight, roles=None):
+        if Qt.ItemDataRole.EditRole in (
+                roles or [Qt.ItemDataRole.EditRole]):  # Проверка, что изменение - редактирование
+            self.data_handler.save_to_db()
 
     def update_plot_button(self):
         chart_type = self.graph_type_combo_box.currentText()
@@ -122,18 +138,14 @@ class MainWindow(QMainWindow, GuiMainWindow):
         if not self.data_handler.df.empty:
             chart_type, x_axis, y_axis, column = self._get_plot_parameters()
             if self._validate_plot_parameters(chart_type, x_axis, y_axis, column):
-                fig, ax = plt.subplots(figsize=(10, 6))
-
-                if self.plot_handler.plot(self.data_handler.df, chart_type, x_axis, y_axis, column, ax):
-                    self._show_plot_widget(fig)
+                self._create_and_show_plot(chart_type, x_axis, y_axis, column)
         else:
             QMessageBox.warning(self, "Ошибка", "Таблица данных пуста")
 
     def _create_and_show_plot(self, chart_type, x_axis, y_axis, column):
-        fig, ax = plt.subplots(figsize=(10, 6))
         try:
-            self.plot_handler.plot(self.data_handler.df, chart_type, x_axis, y_axis, column, ax)
-            self._show_plot_widget(fig)
+            self.plot_window = PlotWindow(self.data_handler.df, chart_type, x_axis, y_axis, column, self)  # Передаём df
+            self.plot_window.show()
         except Exception as e:
             QMessageBox.warning(self, "Ошибка", f"Ошибка при построении графика: {e}")
 
@@ -154,13 +166,10 @@ class MainWindow(QMainWindow, GuiMainWindow):
             return False
         return True
 
-    def _show_plot_widget(self, fig):
-        if self.plot_widget:
-            self.plot_settings_layout.removeWidget(self.plot_widget)
-            self.plot_widget.deleteLater()
-        self.plot_widget = FigureCanvas(fig) # Изменение здесь
-        self.plot_settings_layout.addWidget(self.plot_widget)
-        self.plot_widget.draw() # Добавлено для отображения графика
+    @pyqtSlot()
+    def _on_save_button_clicked(self):
+        self.data_handler.save_to_db()
+        QMessageBox.information(self, "Успех", "Данные успешно сохранены в базу данных.")
 
 
 class AlignDelegate(QStyledItemDelegate):
@@ -169,10 +178,26 @@ class AlignDelegate(QStyledItemDelegate):
         option.displayAlignment = Qt.AlignmentFlag.AlignCenter
 
 
-class PlotWidget(QWidget):
-    def __init__(self, fig):
-        super().__init__()
-        self.canvas = FigureCanvas(fig)
+class PlotWindow(QDialog):  # Изменили на QDialog
+    def __init__(self, df, chart_type, x_axis, y_axis, column, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("График")
+        self.plot_handler = PlotHandler()
+        self.df = df
+        self.chart_type = chart_type
+        self.x_axis = x_axis
+        self.y_axis = y_axis
+        self.column = column
+
+        self.figure, self.ax = plt.subplots(figsize=(10, 6))
+        self.canvas = FigureCanvas(self.figure)
+
         layout = QVBoxLayout()
         layout.addWidget(self.canvas)
         self.setLayout(layout)
+
+        self.plot_chart()
+
+    def plot_chart(self):
+        if self.plot_handler.plot(self.df, self.chart_type, self.x_axis, self.y_axis, self.column, self.ax):
+            self.canvas.draw()
