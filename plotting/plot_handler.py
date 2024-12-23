@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from PyQt6.QtWidgets import QMessageBox
-from matplotlib import patches
 
 
 class PlotHandler:
@@ -19,7 +17,7 @@ class PlotHandler:
         if chart_type == "Диаграмма рассеяния":
             if not (pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column])):
                 QMessageBox.warning(None, "Ошибка", "Оси X и Y должны содержать числовые данные.")
-                return False  # Возвращаем False, чтобы не строить график
+                return False
         try:
             plot_function = self.plot_functions.get(chart_type)
             if plot_function:
@@ -78,10 +76,10 @@ class PlotHandler:
 
     def _plot_pie(self, df, x_column, y_column, column, ax):
         data = df[column].dropna().value_counts()
-        if len(data) > 10:  # Устанавливаем ограничение на 10 категорий
-            other = data[data < 2].sum()  # Суммируем категории с количеством меньше 10 в категорию "Другие"
-            data = data[data >= 2]  # Оставляем только категории с количеством больше или равно 10
-            data['Другие'] = other  # Добавляем категорию "Другие"
+        if len(data) > 10:
+            other = data[data < 2].sum()
+            data = data[data >= 2]
+            data['Другие'] = other
         wedges, texts, autotexts = ax.pie(data, labels=data.index, autopct='%1.1f%%', startangle=140)
         ax.legend(wedges, data.index, loc="center left", bbox_to_anchor=(1, 0.5))
         ax.axis('equal')

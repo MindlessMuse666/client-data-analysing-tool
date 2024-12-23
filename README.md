@@ -44,12 +44,16 @@
 ### Backend-GUI (от 19.12):
 ![image](https://github.com/user-attachments/assets/3f06b4d0-cfa4-4621-9ae5-f43d4834a22b)
 
-### Backend-GUI (от 21.12):
+### Backend-GUI (от 20.12):
 ![image](https://github.com/user-attachments/assets/bd9e3733-818d-44ce-bae5-d6bb4f1adc66)
 
 ---
 
-Начиная с `21.12`, интерфейсы синхронизированы.
+## GUI приложения (от 21.12):
+![image](https://github.com/user-attachments/assets/45c2f79d-3b58-4d36-ae41-36b23704e203)
+
+## GUI приложения (от 22.12):
+![image](https://github.com/user-attachments/assets/df088e7a-e127-49e9-9593-129c69a11941)
 
 ---
 
