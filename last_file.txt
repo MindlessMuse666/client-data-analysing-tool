@@ -1,1 +1,0 @@
-C:/Users/vlad/PycharmProjects/client-data-analysing-tool/big_data/databases_csv/bank_clients_database.csv

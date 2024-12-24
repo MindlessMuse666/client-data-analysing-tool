@@ -1,22 +1,44 @@
 import datetime
+from typing import List
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm, inch
 from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether
+import pandas as pd
 
 
-class ReportGenerator:
-    def __init__(self):
-        pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
+class ReportHandler:
+    """
+    Класс для генерации PDF отчетов на основе данных из DataFrame.
+
+    Attributes:
+        base_font_name (str): Базовое имя шрифта для отчета.
+        base_text_color (reportlab.lib.colors.Color): Базовый цвет текста.
+        base_alignment (int): Базовое выравнивание текста.
+        base_leading (int): Базовый межстрочный интервал.
+        title_style (ParagraphStyle): Стиль заголовка.
+        end_page_style (ParagraphStyle): Стиль для текста в конце отчета.
+        end_page_small_style (ParagraphStyle): Стиль для мелкого текста в конце отчета.
+        end_page_smallest_style (ParagraphStyle): Стиль для самого мелкого текста в конце отчета.
+        month_names (dict): Словарь с названиями месяцев.
+    """
+
+    def __init__(self, font_path: str = "static/fonts/Secession_Text.ttf"):
+        """
+        Инициализирует ReportHandler, регистрирует шрифт и устанавливает стили.
+
+        Args:
+            font_path (str, optional): Путь к файлу шрифта. По умолчанию "Secession_Text.ttf".
+        """
+        pdfmetrics.registerFont(TTFont('Secession_Text', font_path))
         self.styles = getSampleStyleSheet()
 
-        self.base_font_name = 'Arial'
+        self.base_font_name = 'Secession_Text'
         self.base_text_color = colors.black
         self.base_alignment = TA_CENTER
         self.base_leading = 7
@@ -49,14 +71,27 @@ class ReportGenerator:
             alignment=TA_CENTER
         )
 
-
         self.month_names = {
             1: 'января', 2: 'февраля', 3: 'марта', 4: 'апреля', 5: 'мая', 6: 'июня',
             7: 'июля', 8: 'августа', 9: 'сентября', 10: 'октября', 11: 'ноября', 12: 'декабря'
         }
 
-    def _create_paragraph_style(self, name, parent, font_size, alignment=None, text_color=None, leading=None):
-        """Создает и возвращает объект ParagraphStyle."""
+    def _create_paragraph_style(self, name: str, parent: ParagraphStyle, font_size: int, alignment: int = None,
+                                text_color: colors.Color = None, leading: int = None) -> ParagraphStyle:
+        """
+        Создает и возвращает объект ParagraphStyle.
+
+        Args:
+            name (str): Имя стиля.
+            parent (ParagraphStyle): Родительский стиль.
+            font_size (int): Размер шрифта.
+            alignment (int, optional): Выравнивание текста. По умолчанию None.
+            text_color (colors.Color, optional): Цвет текста. По умолчанию None.
+            leading (int, optional): Межстрочный интервал. По умолчанию None.
+
+        Returns:
+            ParagraphStyle: Созданный объект ParagraphStyle.
+        """
         style = ParagraphStyle(
             name=name,
             parent=parent,
@@ -68,7 +103,14 @@ class ReportGenerator:
         )
         return style
 
-    def generate_report(self, df, file_path):
+    def generate_report(self, df: pd.DataFrame, file_path: str) -> None:
+        """
+        Генерирует PDF отчет на основе DataFrame и сохраняет его по указанному пути.
+
+        Args:
+            df (pd.DataFrame): DataFrame с данными.
+            file_path (str): Путь для сохранения PDF файла.
+        """
         custom_width = 29.7 * cm
         custom_height = 21 * cm
         doc = SimpleDocTemplate(file_path, pagesize=(custom_width, custom_height))
@@ -84,7 +126,14 @@ class ReportGenerator:
 
         doc.build(elements)
 
-    def _create_tables_from_dataframe(self, df, elements):
+    def _create_tables_from_dataframe(self, df: pd.DataFrame, elements: List) -> None:
+        """
+        Создает таблицы из DataFrame и добавляет их в список элементов.
+
+        Args:
+            df (pd.DataFrame): DataFrame с данными.
+            elements (List): Список элементов для добавления таблиц.
+        """
         max_width = 29.7 * cm - 2 * inch
 
         df_copy = df.copy()
@@ -132,18 +181,47 @@ class ReportGenerator:
         ]))
         elements.append(table)
 
-    def _split_long_text(self, text, max_length=30):
+    def _split_long_text(self, text: str, max_length: int = 30) -> str:
+        """
+        Разделяет длинный текст на несколько строк, если он превышает заданную длину.
+
+        Args:
+            text (str): Текст для разделения.
+            max_length (int, optional): Максимальная длина строки. По умолчанию 30.
+
+        Returns:
+            str: Разделенный текст.
+        """
         if isinstance(text, str) and len(text) > max_length:
             return "\n".join(simpleSplit(text, self.base_font_name, 9, max_length))
         return str(text)
 
-    def _calculate_text_width(self, text, font_size):
-        """Вычисляет ширину текста с учетом шрифта."""
+    def _calculate_text_width(self, text: str, font_size: int) -> float:
+        """
+        Вычисляет ширину текста с учетом шрифта.
+
+        Args:
+            text (str): Текст для вычисления ширины.
+            font_size (int): Размер шрифта.
+
+        Returns:
+            float: Ширина текста.
+        """
         return pdfmetrics.stringWidth(text, self.base_font_name, font_size)
 
-    def _calculate_column_widths(self, df, max_width):
+    def _calculate_column_widths(self, df: pd.DataFrame, max_width: float) -> tuple[List[float], float]:
+        """
+        Вычисляет ширину колонок таблицы и размер шрифта.
+
+        Args:
+            df (pd.DataFrame): DataFrame с данными.
+            max_width (float): Максимальная ширина для таблицы.
+
+        Returns:
+            tuple[List[float], float]: Список с ширинами колонок и размер шрифта.
+        """
         col_widths = []
-        font_size = 9  # Инициализируем размер шрифта
+        font_size = 9
 
         for column in df.columns:
             max_text_width = max([self._calculate_text_width(str(x), font_size) for x in df[column]] + [
@@ -167,7 +245,13 @@ class ReportGenerator:
 
         return col_widths, font_size
 
-    def _generate_title_page(self, elements):
+    def _generate_title_page(self, elements: List) -> None:
+        """
+        Создает и добавляет страницу с заголовком в список элементов.
+
+        Args:
+            elements (List): Список элементов для добавления страницы с заголовком.
+        """
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%d ") + self.month_names[current_date.month] + current_date.strftime(
             " %Y")
@@ -180,12 +264,17 @@ class ReportGenerator:
         ]
         elements.append(KeepTogether(title_content))
 
-    def _generate_end_page(self, elements, df):
+    def _generate_end_page(self, elements: List, df: pd.DataFrame) -> None:
+        """
+        Создает и добавляет страницу с информацией о конце отчета.
+
+        Args:
+            elements (List): Список элементов для добавления страницы с информацией о конце отчета.
+            df (pd.DataFrame): DataFrame, для получения информации о количестве строк.
+        """
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%d ") + self.month_names[current_date.month] + current_date.strftime(
             " %Y")
-        columns_str = '\n'.join(df.columns.to_list())
-
         end_page_content = [
             Paragraph("Конец отчёта", self.end_page_style),
             Spacer(1, 1 * inch),
