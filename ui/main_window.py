@@ -1,9 +1,10 @@
+# main_window.py
 import os
 
 import matplotlib.pyplot as plt
-from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtCore import pyqtSlot, Qt, QObject, pyqtSignal
 from PyQt6.QtWidgets import (QFileDialog, QMessageBox, QMainWindow, QStyledItemDelegate, QHeaderView, QVBoxLayout,
-                             QDialog)
+                             QDialog, QTableView, QSizePolicy, QWidget)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import pandas as pd
 
@@ -12,6 +13,47 @@ from data_processing.report_generator import ReportGenerator
 from frontend.client_data_analising_tool import GuiMainWindow
 from model.pandas_model import PandasModel
 from plotting.plot_handler import PlotHandler
+from static.styles.styles import tableview_style
+
+
+class TableWindow(QMainWindow):
+    closed = pyqtSignal()
+
+    def __init__(self, model, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Таблица данных")
+        self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, False)
+        self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
+
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+
+        layout = QVBoxLayout(central_widget)
+
+        self.table_view = QTableView()
+        self.table_view.setStyleSheet(tableview_style)
+        self.table_view.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.table_view.setModel(model)
+        # --- Изменяем параметр ---
+        self.table_view.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
+        # --- Конец изменения параметра ---
+        self.table_view.setMinimumSize(1000, 800)
+
+        layout.addWidget(self.table_view)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.showMaximized()
+
+    def closeEvent(self, event):
+        self.closed.emit()
+        super().closeEvent(event)
 
 
 class MainWindow(QMainWindow, GuiMainWindow):
@@ -22,11 +64,13 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
         self.data_handler = DataHandler()
         self.plot_handler = PlotHandler()
-        self.plot_window = None  # Изменили на PlotWindow
+        self.plot_window = None
         self.report_generator = ReportGenerator()
 
+        self.table_window = None
+
         self.choice_button.clicked.connect(self._on_choice_button_clicked)
-        self.save_button.clicked.connect(self._on_save_button_clicked)  # Добавили обработчик кнопки
+        self.save_button.clicked.connect(self._on_save_button_clicked)
         self.report_button.clicked.connect(self._on_report_button_clicked)
         self.build_graph_button.clicked.connect(self.plot_chart)
         self.sort_button.clicked.connect(self.sort_data)
@@ -34,13 +78,14 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.x_axis_combo_box.currentIndexChanged.connect(self.update_plot_button)
         self.y_axis_combo_box.currentIndexChanged.connect(self.update_plot_button)
         self.column_combo_box.currentIndexChanged.connect(self.update_plot_button)
+        self.expand_table_button.clicked.connect(self._on_expand_table_button_clicked)
 
         self.showMaximized()
         self.update_plot_button()
         self.open_file()
 
     def closeEvent(self, event):
-        self.data_handler.save_to_db()  # Сохраняем перед закрытием
+        self.data_handler.save_to_db()
         event.accept()
 
     @pyqtSlot()
@@ -48,7 +93,7 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.last_file_path = self.data_handler.load_last_file_path()
         if self.last_file_path and os.path.exists(self.last_file_path):
             self._load_and_display_data(self.last_file_path)
-            self.data_handler.load_from_db()  # Загружаем данные из БД при открытии
+            self.data_handler.load_from_db()
             self.display_data(self.data_handler.df)
         else:
             self._on_choice_button_clicked()
@@ -91,27 +136,26 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.x_axis_combo_box.clear()
         self.y_axis_combo_box.clear()
         self.column_combo_box.clear()
-        self.sort_column_combo_box.clear()  # Очищаем комбобокс столбцов
+        self.sort_column_combo_box.clear()
 
         self.data_table.setModel(model)
         self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         delegate = AlignDelegate()
         self.data_table.setItemDelegate(delegate)
 
-        # Устанавливаем связь с dataChanged после установки модели
         self.data_table.model().dataChanged.connect(self._on_data_changed)
 
         if not df.empty:
             self.x_axis_combo_box.addItems(df.columns)
             self.y_axis_combo_box.addItems(df.columns)
             self.column_combo_box.addItems(df.columns)
-            self.sort_column_combo_box.addItems(df.columns)  # Добавляем столбцы в комбобокс для сортировки
+            self.sort_column_combo_box.addItems(df.columns)
 
         self.update_plot_button()
 
     def _on_data_changed(self, topLeft, bottomRight, roles=None):
         if Qt.ItemDataRole.EditRole in (
-                roles or [Qt.ItemDataRole.EditRole]):  # Проверка, что изменение - редактирование
+                roles or [Qt.ItemDataRole.EditRole]):
             self.data_handler.save_to_db()
 
     def update_plot_button(self):
@@ -150,16 +194,19 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
     def _create_and_show_plot(self, chart_type, x_axis, y_axis, column):
         try:
-            self.plot_window = PlotWindow(self.data_handler.df, chart_type, x_axis, y_axis, column, self)  # Передаём df
+            self.plot_window = PlotWindow(self.data_handler.df, chart_type, x_axis, y_axis, column, self)
             self.plot_window.show()
         except Exception as e:
             QMessageBox.warning(self, "Ошибка", f"Ошибка при построении графика: {e}")
 
     def _get_plot_parameters(self):
         chart_type = self.graph_type_combo_box.currentText()
-        x_axis = self.x_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния", "Линейный график"] else None
-        y_axis = self.y_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния", "Линейный график"] else None
-        column = self.column_combo_box.currentText() if chart_type not in ["Диаграмма рассеяния", "Линейный график"] else None
+        x_axis = self.x_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния",
+                                                                       "Линейный график"] else None
+        y_axis = self.y_axis_combo_box.currentText() if chart_type in ["Диаграмма рассеяния",
+                                                                       "Линейный график"] else None
+        column = self.column_combo_box.currentText() if chart_type not in ["Диаграмма рассеяния",
+                                                                           "Линейный график"] else None
         return chart_type, x_axis, y_axis, column
 
     def _validate_plot_parameters(self, chart_type, x_axis, y_axis, column):
@@ -168,12 +215,13 @@ class MainWindow(QMainWindow, GuiMainWindow):
                 QMessageBox.warning(self, "Ошибка", "Для диаграммы рассеяния необходимо выбрать оси X и Y.")
                 return False
         elif chart_type == "Линейный график":
-             if not x_axis or not y_axis:
-                 QMessageBox.warning(self, "Ошибка", "Для линейного графика необходимо выбрать оси X и Y.")
-                 return False
-             if not (pd.api.types.is_numeric_dtype(self.data_handler.df[x_axis]) and pd.api.types.is_numeric_dtype(self.data_handler.df[y_axis])):
-                 QMessageBox.warning(self, "Ошибка", "Оси X и Y должны содержать числовые данные.")
-                 return False
+            if not x_axis or not y_axis:
+                QMessageBox.warning(self, "Ошибка", "Для линейного графика необходимо выбрать оси X и Y.")
+                return False
+            if not (pd.api.types.is_numeric_dtype(self.data_handler.df[x_axis]) and pd.api.types.is_numeric_dtype(
+                    self.data_handler.df[y_axis])):
+                QMessageBox.warning(self, "Ошибка", "Оси X и Y должны содержать числовые данные.")
+                return False
         elif chart_type not in ["Диаграмма рассеяния", "Линейный график"] and not column:
             QMessageBox.warning(self, "Ошибка", f"Для {chart_type} необходимо выбрать столбец.")
             return False
@@ -184,14 +232,12 @@ class MainWindow(QMainWindow, GuiMainWindow):
         self.data_handler.save_to_db()
         QMessageBox.information(self, "Успех", "Данные успешно сохранены в базу данных.")
 
-
     @pyqtSlot()
     def _on_report_button_clicked(self):
         if self.data_handler.df.empty:
             QMessageBox.warning(self, "Ошибка", "Нет данных для создания отчёта.")
             return
         self._save_report_to_file()
-
 
     def _save_report_to_file(self):
         file_dialog = QFileDialog(self)
@@ -202,10 +248,36 @@ class MainWindow(QMainWindow, GuiMainWindow):
 
         if file_path:
             try:
-               self.report_generator.generate_report(self.data_handler.df, file_path)
-               QMessageBox.information(self, "Успех", f"Отчет сохранен в {file_path}")
+                self.report_generator.generate_report(self.data_handler.df, file_path)
+                QMessageBox.information(self, "Успех", f"Отчет сохранен в {file_path}")
             except Exception as e:
-               QMessageBox.critical(self, "Ошибка", f"Ошибка сохранения отчета: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Ошибка сохранения отчета: {e}")
+
+    @pyqtSlot()
+    def _on_expand_table_button_clicked(self):
+        try:
+            model = self.data_table.model()
+            if model:
+                if self.table_window:
+                    self.table_window.close()
+                self.table_window = TableWindow(model, self)
+
+                # --- применяем делегат после установки модели ---
+                delegate = AlignDelegate()
+                for column in range(model.columnCount()):
+                    self.table_window.table_view.setItemDelegateForColumn(column, delegate)
+                # --- end of applying delegate ---
+
+                self.table_window.closed.connect(self._on_table_window_closed)
+                self.table_window.show()
+            else:
+                QMessageBox.warning(self, "Ошибка", "Нет данных для отображения")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при открытии таблицы: {e}")
+
+    def _on_table_window_closed(self):
+        self.table_window = None
+
 
 class AlignDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
@@ -213,7 +285,7 @@ class AlignDelegate(QStyledItemDelegate):
         option.displayAlignment = Qt.AlignmentFlag.AlignCenter
 
 
-class PlotWindow(QDialog):  # Изменили на QDialog
+class PlotWindow(QDialog):
     def __init__(self, df, chart_type, x_axis, y_axis, column, parent=None):
         super().__init__(parent)
         self.setWindowTitle("График")
