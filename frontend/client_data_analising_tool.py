@@ -1,3 +1,5 @@
+
+# client_data_analising_tool.py
 from PyQt6.QtCore import QMetaObject, QSize
 from PyQt6.QtGui import QIcon, QPixmap, QFont
 from PyQt6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QGridLayout, QComboBox, QTableView, \
@@ -199,6 +201,13 @@ class GuiMainWindow(object):
         self.report_button = QPushButton("Создать отчёт")
         self.report_button.setStyleSheet(button_style)
         self.report_panel_layout.addWidget(self.report_button)
+
+        # --- Добавляем кнопку "Раскрыть таблицу" ---
+        self.expand_table_button = QPushButton("Раскрыть таблицу")
+        self.expand_table_button.setStyleSheet(button_style)
+        self.report_panel_layout.addWidget(self.expand_table_button)
+        # --- Конец добавления кнопки ---
+
         self.main_layout.addWidget(self.report_panel)
 
 

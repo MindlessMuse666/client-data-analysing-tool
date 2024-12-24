@@ -1,1 +1,1 @@
-C:/Users/vlad/Desktop/fitness_test_data.csv
+C:/Users/vlad/Desktop/client_test_data_1.csv
