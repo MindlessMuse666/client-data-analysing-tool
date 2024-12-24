@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt, QAbstractTableModel
 import pandas as pd
 from PyQt6.QtWidgets import QMessageBox
 
+
 class PandasModel(QAbstractTableModel):
     def __init__(self, data):
         QAbstractTableModel.__init__(self)
@@ -34,7 +35,6 @@ class PandasModel(QAbstractTableModel):
                 row = index.row()
                 col = index.column()
                 try:
-                    # Пытаемся преобразовать значение к исходному типу данных
                     if pd.api.types.is_numeric_dtype(self._dtypes.iloc[col]):
                         value = pd.to_numeric(value)
                     self._data.iloc[row, col] = value

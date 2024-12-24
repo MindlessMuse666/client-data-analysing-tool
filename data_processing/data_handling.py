@@ -1,6 +1,7 @@
 import sqlite3
 
 import pandas as pd
+from PyQt6.QtWidgets import QMessageBox
 
 
 class DataHandler:
@@ -9,7 +10,13 @@ class DataHandler:
         self.db_name = "client_data.db"
 
     def load_csv(self, file_name):
-        self.df = pd.read_csv(file_name, sep=';', encoding='cp1251', on_bad_lines='skip')
+        try:
+            self.df = pd.read_csv(file_name, sep=';', encoding='utf-8', on_bad_lines='skip')
+            self.save_to_db()  # Сохраняем сразу после загрузки
+        except Exception as e:
+            QMessageBox.critical(None, "Ошибка", f"Ошибка при загрузке CSV: {e}")
+            self.df = pd.DataFrame()
+
 
     def save_last_file_path(self, file_path):
         try:
@@ -29,31 +36,43 @@ class DataHandler:
             return None
 
     def save_to_db(self):
+        conn = None  # инициализируем conn
         try:
-            conn = sqlite3.connect(self.db_name)
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS client_data (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT
-                )
-            ''')
-            for col in self.df.columns:
-                cursor.execute(f"ALTER TABLE client_data ADD COLUMN '{col}' TEXT")
-
-            for index, row in self.df.iterrows():
-                placeholders = ", ".join(["?"] * len(row))
-                cursor.execute(f"INSERT INTO client_data ({', '.join(['?'] * len(self.df.columns))}) VALUES ({placeholders})", tuple(row))
-
+            conn = sqlite3.connect(self.db_name,
+                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+            self.df.to_sql("client_data",
+                           conn,
+                           if_exists="replace",
+                           index=False)
             conn.commit()
             print("Данные успешно сохранены в базу данных.")
-
-        except sqlite3.OperationalError as e:
-            if "duplicate column name" in str(e):
-                print("Столбцы уже существуют. Данные обновлены.")
-            else:
-                print(f"Ошибка при сохранении данных: {e}")
+        except sqlite3.Error as e:
+            QMessageBox.critical(None, "Ошибка базы данных", f"Ошибка при работе с базой данных: {e}")
         except Exception as e:
-            print(f"Ошибка при сохранении данных: {e}")
+            QMessageBox.critical(None, "Ошибка", f"Произошла непредвиденная ошибка: {e}")
+        finally:
+            if conn:
+                conn.close()
+
+    def sort_dataframe(self, column_name, ascending):
+        self.df.sort_values(by=column_name, ascending=ascending, inplace=True)
+
+
+    def load_from_db(self):
+        conn = None  # Инициализируем conn
+        try:
+            conn = sqlite3.connect(self.db_name,
+                                   detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+            df = pd.read_sql_query("SELECT * FROM client_data", conn)
+            if not df.empty:
+                self.df = df
+                print("Данные успешно загружены из базы данных.")
+            else:
+                print("База данных пуста.")
+        except sqlite3.Error as e:
+            QMessageBox.critical(None, "Ошибка базы данных", f"Ошибка при загрузке данных из базы: {e}")
+        except Exception as e:
+           QMessageBox.critical(None, "Ошибка", f"Произошла непредвиденная ошибка: {e}")
         finally:
             if conn:
                 conn.close()
