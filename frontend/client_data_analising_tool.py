@@ -210,6 +210,9 @@ class GuiMainWindow(object):
 
         # --- Добавляем кнопку "Раскрыть таблицу" ---
         self.expand_table_button = QPushButton("Раскрыть таблицу")
+        expand_icon: QIcon = _get_icon(fullscreen_icon_path)
+        self.expand_table_button.setIcon(expand_icon)
+        self.expand_table_button.setIconSize(icon_size)
         self.expand_table_button.setStyleSheet(button_style)
         self.report_panel_layout.addWidget(self.expand_table_button)
         # --- Конец добавления кнопки ---
