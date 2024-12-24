@@ -1,5 +1,3 @@
-
-# client_data_analising_tool.py
 from PyQt6.QtCore import QMetaObject, QSize
 from PyQt6.QtGui import QIcon, QPixmap, QFont
 from PyQt6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QGridLayout, QComboBox, QTableView, \
