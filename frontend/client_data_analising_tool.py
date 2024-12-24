@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QWidget, QVBoxLayo
     QStatusBar, QSizePolicy, QLayout, QHeaderView
 
 from static.resources.resource_pathes.resource_pathes import (choice_icon_path, save_icon_path, graph_icon_path,
-                                                              main_icon_path)
+                                                              main_icon_path, sort_icon_path, report_icon_path, fullscreen_icon_path)
 from static.styles.styles import button_style, label_style, combobox_style, tableview_style, application_style
 
 
@@ -170,6 +170,9 @@ class GuiMainWindow(object):
         self.sort_panel_layout.addWidget(self.sort_order_combo_box)
 
         self.sort_button = QPushButton("Отсортировать")
+        sort_icon: QIcon = _get_icon(sort_icon_path)
+        self.sort_button.setIcon(sort_icon)
+        self.sort_button.setIconSize(icon_size)
         self.sort_button.setStyleSheet(button_style)
         self.sort_panel_layout.addWidget(self.sort_button)
 
@@ -197,6 +200,9 @@ class GuiMainWindow(object):
         )
         self.report_panel_layout = QHBoxLayout(self.report_panel)
         self.report_button = QPushButton("Создать отчёт")
+        report_icon: QIcon = _get_icon(report_icon_path)
+        self.report_button.setIcon(report_icon)
+        self.report_button.setIconSize(icon_size)
         self.report_button.setStyleSheet(button_style)
         self.report_panel_layout.addWidget(self.report_button)
         self.main_layout.addWidget(self.report_panel)

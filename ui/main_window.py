@@ -67,7 +67,7 @@ class MainWindow(QMainWindow, GuiMainWindow):
             self.data_handler.load_csv(file_name)
             self.display_data(self.data_handler.df)
             self.data_handler.save_last_file_path(file_name)
-            self.file_path_label.setText(file_name)
+            self.file_path_label.setText(file_name[0 : 80] + "...")
         except Exception as e:
             QMessageBox.critical(self, "Критическая ошибка", f"Ошибка при загрузке файла: {e}")
 
