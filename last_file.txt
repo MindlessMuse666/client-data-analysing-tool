@@ -1,1 +1,0 @@
-C:/Users/vlad/PycharmProjects/client-data-analysing-tool/big_data/test_data_csv/client_test_data_1.csv
