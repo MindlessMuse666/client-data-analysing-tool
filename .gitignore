@@ -1,4 +1,30 @@
-*.idea
+# IDE
+.idea/
+.vscode/
 
-*.db
+# Cache
+.venv/
+.env
+*.pyc
+__pycache__/
+*.egg-info/
+pip-log.txt
+
+# Project
 last_open_file.txt
+
+# Qt Designer cache
+*.ui~
+*.rc~
+
+# Compiled resources
+*_rc.py
+*_rc.pyc
+
+# Database
+*.db
+
+# Logs
+*.log
+*.tmp
+temp/
