@@ -1,16 +1,14 @@
-# Клиентский инструмент для анализа данных
+# Клиентский инструмент для анализа данных <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT-License image"></a>
 
-## Введение
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Qt](https://img.shields.io/badge/Qt-%23217346.svg?style=for-the-badge&logo=Qt&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white) ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 
-Этот инструмент предназначен для анализа данных, загруженных из CSV-файлов, их отображения, сортировки, построения графиков и создания отчетов. Приложение написано на `Python` с использованием библиотеки `PyQt6` для графического интерфейса, `pandas` для обработки данных и `matplotlib` для отрисовки графиков, `reportlab` для генерации отчётов.
+Этот инструмент предназначен для анализа данных, загруженных из CSV-файлов, их отображения, сортировки, построения графиков и создания отчетов. Приложение написано на **Python** с использованием библиотеки **PyQt6** для графического интерфейса, **pandas** для обработки данных и **matplotlib** для отрисовки графиков, **reportlab** для генерации отчётов.
 
-## Состояние проекта
-
-Проект завершен.
+---
 
 ## Особенности
 
-- **Загрузка данных:** Загрузка данных из `CSV-файлов` с разделителем `;`.
+- **Загрузка данных:** Загрузка данных из CSV-файлов с разделителем `;`.
 - **Отображение данных:** Отображение загруженных данных в виде таблицы с возможностью редактирования.
 - **Сортировка данных:** Сортировка данных по выбранному столбцу в порядке возрастания или убывания.
 - **Построение графиков:**
@@ -22,6 +20,8 @@
 - **Генерация отчетов:** Создание отчетов в формате `PDF` с данными из таблицы.
 - **Сохранение:** Сохранение данных в базу данных `SQLite`.
 - **Открытие последнего файла:** Автоматическое открытие последнего использованного `CSV-файла` при запуске приложения.
+
+---
 
 ## Структура проекта
 
@@ -62,6 +62,8 @@ client_data_analysing_tool/
 └──
 ```
 
+---
+
 ## Зависимости
 
 - PyQt6
@@ -99,6 +101,8 @@ pip install -r requirements.txt
 python core/main.py
 ```
 
+---
+
 ## Использование
 
 **Загрузка данных:**
@@ -135,11 +139,13 @@ python core/main.py
 
 - Нажмите кнопку `Раскрыть таблицу` для отображения данных в отдельном окне.
 
+---
+
 ## GUI приложения
 
-### Интерфейс готовой программы
-
 ![final-program](https://github.com/user-attachments/assets/7b1dcf1e-290a-4d54-842c-7e7d49dea4a9)
+
+---
 
 ## Построение графиков
 
@@ -163,19 +169,25 @@ python core/main.py
 
 ![pie-diagramm](https://github.com/user-attachments/assets/78d5fdb0-3d20-475a-85a3-99388661bdb8)
 
+---
+
 ## Генерация отчетов
 
 ### Пример сгенерированного отчёта
 
 ![generated-report](https://github.com/user-attachments/assets/c79e57b6-71fd-464d-8028-acf112725c4f)
 
-[скачать-отчёт-в-PDF](https://drive.google.com/file/d/1mxVdWQeT_ldl8Lcv4AjMIe8qELf0FjDQ/view?usp=drive_link)
+Полный сгенированный отчет можно посмотреть [по этой ссылке](https://drive.google.com/file/d/1mxVdWQeT_ldl8Lcv4AjMIe8qELf0FjDQ/view?usp=drive_link).
+
+---
 
 ## Планы на будущее
 
 - Разработка установщика для удобной установки приложения.
 - Разработка тёмной темы.
 - Расширить обрабатываемые форматы.
+
+---
 
 ## Полученный опыт
 
@@ -188,6 +200,8 @@ python core/main.py
 - Разработка баз данных (Excel).
 - Построение графиков по CSV-данным (pandas, matplotlib).
 - Генерация отчётов по CSV-данным (reportlab).
+
+---
 
 ## Авторы проекта
 
@@ -212,3 +226,11 @@ python core/main.py
   - Frontend
   - UI-Designer
   - Project Designer
+
+---
+
+## Лицензия
+
+Этот проект распространяется под лицензией MIT - смотри файл [LICENSE](LICENSE) для деталей.
+
+---
