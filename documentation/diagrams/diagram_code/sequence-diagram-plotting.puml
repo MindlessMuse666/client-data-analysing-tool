@@ -1,0 +1,32 @@
+@startuml Sequence Diagram: Построение графика
+
+!theme mars
+title Sequence Diagram: Построение графика
+
+skinparam sequenceParticipant underline
+skinparam roundcorner 10
+skinparam actorStyle awesome
+skinparam ParticipantFontColor #Black
+
+actor "**Пользователь**" as User #Pink
+participant "**MainWindow**" as MW #Thistle
+participant "**PlotHandler**" as PH #BurlyWood
+participant "**DataHandler**" as DH #LightSkyBlue
+
+User ++ #Pink
+User -> MW ++ #Thistle : Выбирает тип графика и столбцы
+MW -> MW : Валидирует ввод пользователя
+alt#PaleVioletRed Некорректные данные
+    MW --> User: Показать сообщение об ошибке
+else Данные корректны
+    MW -> PH --++ #BurlyWood : build_plot(dataframe, plot_type, x_col, y_col)
+    PH -> DH --++ #LightSkyBlue : get_filtered_data() # Получение актуальных данных
+    DH --> PH --++ #BurlyWood : DataFrame
+    PH -> PH : Создает фигуру matplotlib
+    PH -> PH : render_plot() # Отрисовывает график
+    PH --> MW --++ #Thistle : Figure object
+    MW -> MW : open_plot_dialog(figure) # Открывает диалог с графиком
+    MW --> User -- : Отображает график в новом окне
+end
+
+@enduml
